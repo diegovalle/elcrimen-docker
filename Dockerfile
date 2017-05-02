@@ -28,8 +28,4 @@ ENV LANG en_US.utf8
 # Expose port 22 and 80
 # EXPOSE 22
 
-# Startup script to run mysql and apache
-RUN echo "#!/bin/bash\n/etc/init.d/mysql start\n/etc/init.d/apache2 start\n/bin/bash" > /root/init.sh && \
-    chmod 755 /root/init.sh
-
 ENTRYPOINT ["/bin/bash"]
