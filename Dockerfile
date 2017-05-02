@@ -6,11 +6,10 @@ ADD ansible/ /etc/ansible/
 
 WORKDIR /etc/ansible
 
-RUN apt-get -y install openssh-client
-
 # Install Ansible
 RUN apt-get -y update &&  \
     apt-get -y upgrade &&  \
+    apt-get -y install openssh-client && \
     apt-get -q -y --no-install-recommends install python-yaml \
                python-jinja2 python-httplib2 python-keyczar \
                python-paramiko python-setuptools \
