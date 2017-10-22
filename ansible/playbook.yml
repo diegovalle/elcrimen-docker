@@ -259,6 +259,9 @@
     - name: Install simplehttpserver
       npm:  name=simplehttpserver global=yes
 
+    - name: Install netlify-cli
+      npm:  name=netlify-cli global=yes
+
     # Zopfli compression
 
     - name: Create temp directory for downloading zopfli
