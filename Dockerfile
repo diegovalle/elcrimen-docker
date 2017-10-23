@@ -14,7 +14,7 @@ RUN apt-get -y update &&  \
                python-paramiko python-setuptools \
                python-pkg-resources git python-pip &&  \
     mkdir -p /etc/ansible/ &&  \
-    pip install ansible &&  \
+    pip install ansible==2.1 &&  \
     ansible-playbook -c local playbook.yml && \
     cp /root/new.crimenmexico/downloader/tabula-java/* /root/ &&\
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
