@@ -54,7 +54,7 @@
       tags:
         - r-repository-add
 
-    - name: add ubuntugis-unstable
+    - name: Add ubuntugis-unstable
       apt_repository: repo='ppa:ubuntugis/ubuntugis-unstable' state=present update_cache=yes
 
     - name: Update distro
