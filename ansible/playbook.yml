@@ -54,6 +54,9 @@
       tags:
         - r-repository-add
 
+    - name: add ubuntugis-unstable
+      apt_repository: repo='ppa:ubuntugis/ubuntugis-unstable' state=present update_cache=yes
+
     - name: Update distro
       apt: upgrade=dist update_cache=yes
 
@@ -100,6 +103,10 @@
         - openssh-client
         - rsync
         - nano
+        - libudunits2-dev
+        - libgdal-dev 
+        - libgeos-dev 
+        - libproj-dev 
 
     # ansible-playbook -i hosts playbook.yml --vault-password-file=password.txt --extra-vars "secrets=true"
     - name: Load secrets
