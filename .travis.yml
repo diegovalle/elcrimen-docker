@@ -6,7 +6,10 @@ services:
   - docker
 
 install:
-  - travis_wait 140 docker build -t diegovalle/elcrimen-docker .
+  - while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
+  - docker build -t diegovalle/elcrimen-docker .
+  # Killing background sleep loop
+  - kill %1
 
 deploy:
   provider: script
