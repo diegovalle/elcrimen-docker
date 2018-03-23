@@ -6,8 +6,7 @@ services:
   - docker
 
 before_install:
-  - travis_wait 30 mvn install
-  - docker build -t diegovalle/elcrimen-docker .
+  - travis_wait 30 docker build -t diegovalle/elcrimen-docker .
 
 deploy:
   provider: script
