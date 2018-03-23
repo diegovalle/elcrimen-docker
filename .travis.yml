@@ -1,0 +1,19 @@
+sudo: required
+
+language: R
+
+services:
+  - docker
+
+before_install:
+  - docker build -t diegovalle/elcrimen-docker .
+
+deploy:
+  provider: script
+  script: bash docker_push
+  on:
+    branch: master
+
+branches:
+  only:
+    - master
