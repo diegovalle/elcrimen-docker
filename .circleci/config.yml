@@ -13,10 +13,9 @@ jobs:
       - run:
           name: Build application Docker image
           command: |
-            while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
             docker build -t diegovalle/elcrimen-docker .
-            kill %1
+          no_output_timeout: 1800
       - deploy:
           name: Deploy image to Docker Hub
           command: |
-            bash docker_push
+            /bin/sh docker_push
