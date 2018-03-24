@@ -1,6 +1,9 @@
 version: 2
 jobs:
   build:
+    branches:
+      only:
+        - master
     working_directory: /app
     docker:
       - image: docker:17.06.0-ce-git
@@ -10,7 +13,9 @@ jobs:
       - run:
           name: Build application Docker image
           command: |
+            while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
             docker build -t diegovalle/elcrimen-docker .
+            kill %1
       - deploy:
           name: Deploy image to Docker Hub
           command: |
