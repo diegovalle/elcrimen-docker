@@ -57,8 +57,8 @@
     - name: Add ubuntugis-unstable
       apt_repository: repo='ppa:ubuntugis/ubuntugis-unstable' state=present update_cache=yes
 
-    - name: Add opencpu/jq
-      apt_repository: repo='ppa:opencpu/jq' state=present update_cache=yes
+#    - name: Add opencpu/jq
+#      apt_repository: repo='ppa:opencpu/jq' state=present update_cache=yes
 
     - name: Update distro
       apt: upgrade=dist update_cache=yes
@@ -111,7 +111,7 @@
         - libgeos-dev 
         - libproj-dev 
         - libprotobuf-dev
-        - libjq-dev
+#        - libjq-dev
 
     # ansible-playbook -i hosts playbook.yml --vault-password-file=password.txt --extra-vars "secrets=true"
     - name: Load secrets
@@ -161,7 +161,6 @@
         - dplyr
         - extrafont
         - future
-        - geojsonio
         - ggplot2
         - ggrepel
         - gpclib
