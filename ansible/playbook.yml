@@ -57,6 +57,9 @@
     - name: Add ubuntugis-unstable
       apt_repository: repo='ppa:ubuntugis/ubuntugis-unstable' state=present update_cache=yes
 
+    - name: Add opencpu/jq
+      apt_repository: repo='ppa:opencpu/jq' state=present update_cache=yes
+
     - name: Update distro
       apt: upgrade=dist update_cache=yes
 
@@ -107,6 +110,8 @@
         - libgdal-dev 
         - libgeos-dev 
         - libproj-dev 
+        - libprotobuf-dev
+        - libjq-dev
 
     # ansible-playbook -i hosts playbook.yml --vault-password-file=password.txt --extra-vars "secrets=true"
     - name: Load secrets
@@ -148,42 +153,40 @@
         virtualenv=~/.virtualenvs/crimenmexico/
 
     - name: Add R packages
-      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{item}}' %in% installed.packages()[,'Package'])) install.packages(pkgs='{{item}}')"
+      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{item}}' %in% installed.packages()[,'Package'])) install.packages(pkgs='{{item}}');quit(save = "no", status = !require('{{item}}'))"
       with_items:
-        - pacman
-        - devtools
-        - dplyr
-        - ggplot2
-        - rgeos
-        - magrittr
-        - RSQLite
-        - zoo
-        - lubridate
-        - stringr
-        - grid
-        - Rttf2pt1
-        - extrafont
-        - useful
-        - rgdal
-        - maptools
-        - gpclib
-        - raster
-        - scales
-        - jsonlite
-        - hash
-        - RColorBrewer
+        - AnomalyDetection
         - compiler
         - data.table
-        - mgcv
-        - tidyr
+        - dplyr
+        - extrafont
         - future
-        - XML
         - geojsonio
-        - RJSONIO
-        - spdep
-        - mgcv
+        - ggplot2
         - ggrepel
+        - gpclib
+        - grid
+        - hash
+        - jsonlite
+        - lubridate
+        - magrittr
+        - maptools
+        - mgcv
+        - mxmaps
+        - mxmortalitydb
+        - raster
+        - RColorBrewer
+        - rgdal
+        - rgeos
+        - RSQLite
+        - Rttf2pt1
+        - scales
+        - spdep
+        - stringr
+        - tidyr
+        - useful
         - viridis
+        - zoo
 
     - apt_repository:
         repo: "{{item}}"
