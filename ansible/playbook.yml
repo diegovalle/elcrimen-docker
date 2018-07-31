@@ -153,7 +153,7 @@
         virtualenv=~/.virtualenvs/crimenmexico/
 
     - name: Add R packages
-      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{item}}' %in% installed.packages()[,'Package'])) install.packages(pkgs='{{item}}');quit(save = "no", status = !require('{{item}}'))"
+      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{item}}' %in% installed.packages()[,'Package'])) install.packages(pkgs='{{item}}');quit(save = 'no', status = !require('{{item}}'))"
       with_items:
         - compiler
         - data.table
