@@ -127,7 +127,7 @@
         state: directory
 
     - name: Creates .Rprofile with default repo
-      lineinfile: dest=/root/.Rprofile line='local({r <- getOption("repos");r["CRAN"] <- "https://mran.revolutionanalytics.com/snapshot/2018-02-10";options(repos = r)})' create=True
+      lineinfile: dest=/root/.Rprofile line='local({r <- getOption("repos");r["CRAN"] <- "https://mran.revolutionanalytics.com/snapshot/2018-07-30";options(repos = r)})' create=True
 
     - name: Clone repo new.crimenmexico
       git: repo=https://github.com/diegovalle/new.crimenmexico dest=/root/new.crimenmexico force=yes
@@ -155,7 +155,6 @@
     - name: Add R packages
       command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{item}}' %in% installed.packages()[,'Package'])) install.packages(pkgs='{{item}}');quit(save = "no", status = !require('{{item}}'))"
       with_items:
-        - AnomalyDetection
         - compiler
         - data.table
         - dplyr
@@ -171,8 +170,6 @@
         - magrittr
         - maptools
         - mgcv
-        - mxmaps
-        - mxmortalitydb
         - raster
         - RColorBrewer
         - rgdal
@@ -186,6 +183,7 @@
         - useful
         - viridis
         - zoo
+        - anomalize
 
     - apt_repository:
         repo: "{{item}}"
