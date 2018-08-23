@@ -111,6 +111,7 @@
         - libgeos-dev 
         - libproj-dev 
         - libprotobuf-dev
+        - inkscape
 #        - libjq-dev
 
     # ansible-playbook -i hosts playbook.yml --vault-password-file=password.txt --extra-vars "secrets=true"
