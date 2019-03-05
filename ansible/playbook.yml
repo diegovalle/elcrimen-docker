@@ -5,6 +5,11 @@
   tasks:
   - name: install python 2
     raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+  - name: https for apt
+    apt: name=apt-transport-https state=latest
+  - apt: name=lsb-release state=latest
+  - name: build-essential
+    apt: name=build-essential state=latest
   - name: Install Python Packages
     apt: name="{{ item }}" state=latest
     with_items:
@@ -25,17 +30,72 @@
 - hosts: all
   vars:
     nodejs_nodesource_pin_priority: 500
+    nodejs_version: "10.x"
     r_repository:
       - type: deb
         url: "http://cran.rstudio.com/bin/linux/ubuntu  {{ ansible_distribution_release }}/"
 
-  tasks:
+  pre_tasks:
+    - name: Update apt cache.
+      apt: update_cache=true cache_valid_time=600
 
-    - name: apt-get update
-      raw: apt-get update -qq
+
+  tasks:
 
     # needed for installing hashlib
     - file: path=/usr/lib/python2.7/lib-dynload/_hashlib.x86_64-linux-gnu.so state=absent
+    
+    # nodejs
+    #- name: Import the NodeSource GPG key into apt
+    #  apt_key:
+    #    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+
+    #- name: Add NodeSource deb repository
+    #  apt_repository:
+    #    repo: 'deb https://deb.nodesource.com/setup_{{ nodejs_version }} {{ ansible_distribution_release }} main'
+    #    state: present
+
+    #- name: Add NodeSource deb-src repository
+    #  apt_repository:
+    #    repo: 'deb-src https://deb.nodesource.com/setup_{{ nodejs_version }} {{ ansible_distribution_release }} main'
+    #    state: present
+
+    #- name: Add NodeSource repository preferences
+    #  template:
+    #    src: deb_nodesource_com_node.pref.2
+    #    dest: /etc/apt/preferences.d/deb_nodesource_com_node.pref
+
+    #- name: Install Node.js
+    #  apt:
+    #    pkg:
+    #      - nodejs
+    #    state: installed
+    #    update_cache: yes
+
+    - name: Install phantomjs
+      command: bash -lc "npm install -g phantomjs-prebuilt --unsafe-perm"
+
+    - name: Install casperjs
+      npm:  name=casperjs global=yes
+
+    - name: Install simplehttpserver
+      npm:  name=simplehttpserver global=yes
+
+    - name: Install netlify-cli
+      npm:  name=netlify-cli global=yes version=2.8.2
+      
+    # Locales
+      
+    - name: install locales
+      apt: name=locales state=latest
+
+    - name: Spanish locale
+      locale_gen: name=es_ES.UTF-8 state=present
+
+    - name: English locale
+      locale_gen: name=en_US.UTF-8 state=present
+      
+    # R
 
     - name: Add R repository public key
       apt_key:
@@ -62,12 +122,6 @@
 
     - name: Update distro
       apt: upgrade=dist update_cache=yes
-
-    - name: Spanish locale
-      locale_gen: name=es_ES.UTF-8 state=present
-
-    - name: English locale
-      locale_gen: name=en_US.UTF-8 state=present
 
     - name: Remove Packages
       apt: name="{{ item }}" state=absent
@@ -112,6 +166,9 @@
         - libproj-dev 
         - libprotobuf-dev
         - inkscape
+        - wget
+        - curl
+        - unzip
 #        - libjq-dev
 
     # ansible-playbook -i hosts playbook.yml --vault-password-file=password.txt --extra-vars "secrets=true"
@@ -138,12 +195,6 @@
 
     - name: Refresh Font cache
       command: fc-cache -f -v
-
-    - name: Creates tabula-java directory
-      file: path=~/new.crimenmexico/downloader/tabula-java state=directory
-
-    - name: download tabula-java
-      get_url: url=https://github.com/tabulapdf/tabula-java/releases/download/tabula-0.9.0/tabula-0.9.0-SNAPSHOT-jar-with-dependencies.jar dest=~/new.crimenmexico/downloader/tabula-java
 
     - name: Create the initial virtualenv
       command: virtualenv ~/.virtualenvs/crimenmexico/ -p python2 creates="~/.virtualenvs/crimenmexico/"
@@ -203,6 +254,9 @@
         - libfreetype6-dev
         - libfontconfig
 
+    - name: Install sudo
+      apt: pkg=sudo state=latest
+
     - name: Accept License
       shell: 'echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections'
     - apt: pkg=ttf-mscorefonts-installer
@@ -220,44 +274,6 @@
         - twitter/AnomalyDetection
         - diegovalle/mxmaps
 
-    - name: Import the NodeSource GPG key into apt
-      apt_key:
-        id: 68576280
-        url: "https://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0x1655A0AB68576280"
-
-    - name: Add NodeSource deb repository
-      apt_repository:
-        repo: 'deb https://deb.nodesource.com/node_4.x {{ ansible_distribution_release }} main'
-        state: present
-
-    - name: Add NodeSource deb-src repository
-      apt_repository:
-        repo: 'deb-src https://deb.nodesource.com/node_4.x {{ ansible_distribution_release }} main'
-        state: present
-
-    - name: Add NodeSource repository preferences
-      template:
-        src: deb_nodesource_com_node.pref.2
-        dest: /etc/apt/preferences.d/deb_nodesource_com_node.pref
-
-    - name: Install Node.js
-      apt:
-        pkg:
-          - nodejs
-        state: installed
-        update_cache: yes
-
-    - name: Install phantomjs
-      npm: name=phantomjs-prebuilt global=yes
-
-    - name: Install casperjs
-      npm:  name=casperjs global=yes
-
-    - name: Install simplehttpserver
-      npm:  name=simplehttpserver global=yes
-
-    - name: Install netlify-cli
-      npm:  name=netlify-cli global=yes
 
     # Zopfli compression
 

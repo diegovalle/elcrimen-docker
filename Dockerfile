@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 MAINTAINER Diego Valle-Jones
 
 # Add ansible configuration
@@ -14,9 +14,14 @@ RUN apt-get -y update &&  \
                python-paramiko python-setuptools \
                python-pkg-resources git python-pip &&  \
     mkdir -p /etc/ansible/ &&  \
-    pip install ansible==2.1 &&  \
-    ansible-playbook -c local playbook.yml && \
-    cp /root/new.crimenmexico/downloader/tabula-java/* /root/ &&\
+    pip install ansible==2.1 
+    
+RUN apt-get -y install curl gnupg
+RUN curl -sL https://deb.nodesource.com/setup_10.x  | bash -
+RUN apt-get -y install nodejs
+RUN npm install    
+
+RUN ansible-playbook -c local playbook.yml && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
