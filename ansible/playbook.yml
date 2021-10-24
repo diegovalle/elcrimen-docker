@@ -3,37 +3,12 @@
   gather_facts: False
 
   tasks:
-  - name: install python 2
-    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
-  - name: https for apt
-    apt: name=apt-transport-https state=latest
-  - apt: name=lsb-release state=latest
-  - name: build-essential
-    apt: name=build-essential state=latest
-  - name: Install Python Packages
-    apt: name="{{ item }}" state=latest
-    with_items:
-        - python-pip
-        - python-virtualenv
-        - python-dev
-        - libffi-dev 
-        - libssl-dev 
-        - libxml2-dev 
-        - libxslt1-dev 
-        - libjpeg8-dev 
-        - zlib1g-dev
-  - name: pip utilities for https
-    pip: name={{ item }} state=latest
-    with_items:
-      - urllib3
+  - name: install python
+    raw: test -e /usr/bin/python3 || (apt -y update && apt install -y python3 python3-setuptools)
 
 - hosts: all
   vars:
-    nodejs_nodesource_pin_priority: 500
-    nodejs_version: "10.x"
-    r_repository:
-      - type: deb
-        url: "http://cran.rstudio.com/bin/linux/ubuntu  {{ ansible_distribution_release }}/"
+    ansible_python_interpreter: /usr/bin/python3
 
   pre_tasks:
     - name: Update apt cache.
@@ -41,51 +16,7 @@
 
 
   tasks:
-
-    # needed for installing hashlib
-    - file: path=/usr/lib/python2.7/lib-dynload/_hashlib.x86_64-linux-gnu.so state=absent
-    
-    # nodejs
-    #- name: Import the NodeSource GPG key into apt
-    #  apt_key:
-    #    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
-
-    #- name: Add NodeSource deb repository
-    #  apt_repository:
-    #    repo: 'deb https://deb.nodesource.com/setup_{{ nodejs_version }} {{ ansible_distribution_release }} main'
-    #    state: present
-
-    #- name: Add NodeSource deb-src repository
-    #  apt_repository:
-    #    repo: 'deb-src https://deb.nodesource.com/setup_{{ nodejs_version }} {{ ansible_distribution_release }} main'
-    #    state: present
-
-    #- name: Add NodeSource repository preferences
-    #  template:
-    #    src: deb_nodesource_com_node.pref.2
-    #    dest: /etc/apt/preferences.d/deb_nodesource_com_node.pref
-
-    #- name: Install Node.js
-    #  apt:
-    #    pkg:
-    #      - nodejs
-    #    state: installed
-    #    update_cache: yes
-
-    - name: Install phantomjs
-      command: bash -lc "npm install -g phantomjs-prebuilt --unsafe-perm"
-
-    - name: Install casperjs
-      npm:  name=casperjs global=yes
-
-    - name: Install simplehttpserver
-      npm:  name=simplehttpserver global=yes
-
-    - name: Install netlify-cli
-      npm:  name=netlify-cli global=yes version=2.8.2
-      
     # Locales
-      
     - name: install locales
       apt: name=locales state=latest
 
@@ -94,159 +25,37 @@
 
     - name: English locale
       locale_gen: name=en_US.UTF-8 state=present
-      
-    # R
-
-    - name: Add R repository public key
-      apt_key:
-        id: E084DAB9
-        keyserver: keyserver.ubuntu.com
-        state: present
-      tags:
-        - r-repository-public-key
-
-    - name: Add R repository
-      apt_repository:
-        repo: "{{ item.type }} {{ item.url }}"
-        state: present
-        update_cache: true
-      with_items: "{{ r_repository }}"
-      tags:
-        - r-repository-add
-
-    - name: Add ubuntugis-unstable
-      apt_repository: repo='ppa:ubuntugis/ubuntugis-unstable' state=present update_cache=yes
-
-#    - name: Add opencpu/jq
-#      apt_repository: repo='ppa:opencpu/jq' state=present update_cache=yes
 
     - name: Update distro
       apt: upgrade=dist update_cache=yes
 
-    - name: Remove Packages
-      apt: name="{{ item }}" state=absent
-      with_items:
-        - apache
-        - samba
-        - sendmail
-        - bind9
-        - ncsd
-        - sasl
-        - exim
-        - ntp
-
-    - name: Install Packages
-      apt: name="{{ item }}" state=latest
-      with_items:
-        - git
-        - r-base
-        - r-base-dev
-        - libv8-3.14-dev
-        - curl
-        - libreoffice
-        - python-virtualenv
-        - python-dev
-        - libcurl4-openssl-dev
-        - sqlite3
-        - libxml2-dev
-        - r-cran-xml
-        - libgdal1-dev
-        - libproj-dev
-        - imagemagick
-        - optipng
-        - htop
-        - gdal-bin
-        - apt-transport-https
-        - openssh-client
-        - rsync
-        - nano
-        - libudunits2-dev
-        - libgdal-dev 
-        - libgeos-dev 
-        - libproj-dev 
-        - libprotobuf-dev
-        - inkscape
-        - wget
-        - curl
-        - unzip
-#        - libjq-dev
-
-    # ansible-playbook -i hosts playbook.yml --vault-password-file=password.txt --extra-vars "secrets=true"
-    - name: Load secrets
-      when: secrets is defined
-      include_vars: secrets.yml
-      no_log: true
-
-    - name: Ensure .ssh directory exists.
-      when: secrets is defined
-      file:
-        dest: "{{ key_file | dirname }}"
-        mode: 0700
-        state: directory
-
     - name: Creates .Rprofile with default repo
-      lineinfile: dest=/root/.Rprofile line='local({r <- getOption("repos");r["CRAN"] <- "https://mran.revolutionanalytics.com/snapshot/2018-07-30";options(repos = r)})' create=True
+      lineinfile: dest=~/.Rprofile line='local({r <- getOption("repos");r["CRAN"] <- "https://mran.revolutionanalytics.com/snapshot/2021-10-20";options(repos = r)})' create=True
+      become: yes
+      become_user: rstudio
 
     - name: Clone repo new.crimenmexico
-      git: repo=https://github.com/diegovalle/new.crimenmexico dest=/root/new.crimenmexico force=yes
-
-    - name: Install fonts
-      command: find /root/new.crimenmexico/R/fonts/ -type f -name '*.ttf' -print -exec cp {} /usr/share/fonts/truetype/ \;
+      git: repo=https://github.com/diegovalle/new.crimenmexico dest=~/new.crimenmexico force=yes
+      become: yes
+      become_user: rstudio
 
     - name: Refresh Font cache
       command: fc-cache -f -v
+      
+    - name: Install virtualenv
+      command: pip3 install virtualenv 
 
     - name: Create the initial virtualenv
-      command: virtualenv ~/.virtualenvs/crimenmexico/ -p python2 creates="~/.virtualenvs/crimenmexico/"
+      command: virtualenv ~/.virtualenvs/crimenmexico/ -p python3 creates="~/.virtualenvs/crimenmexico/"
+      become: yes
+      become_user: rstudio
 
     - name: Install requirements.txt into virtualenv
       pip:
         requirements=~/new.crimenmexico/requirements.txt
         virtualenv=~/.virtualenvs/crimenmexico/
-
-    - name: Add R packages
-      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{item}}' %in% installed.packages()[,'Package'])) install.packages(pkgs='{{item}}');quit(save = 'no', status = !require('{{item}}'))"
-      with_items:
-        - compiler
-        - data.table
-        - dplyr
-        - extrafont
-        - future
-        - ggplot2
-        - ggrepel
-        - gpclib
-        - grid
-        - hash
-        - jsonlite
-        - lubridate
-        - magrittr
-        - maptools
-        - mgcv
-        - pacman
-        - raster
-        - RColorBrewer
-        - rgdal
-        - rgeos
-        - RSQLite
-        - Rttf2pt1
-        - scales
-        - spdep
-        - stringr
-        - tidyr
-        - useful
-        - viridis
-        - zoo
-        - anomalize
-
-    - apt_repository:
-        repo: "{{item}}"
-      register: multiverse_installed
-      when: ansible_distribution == 'Ubuntu'
-      with_items:
-        - 'deb http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}} multiverse'
-        - 'deb-src http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}} multiverse'
-        - 'deb http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}}-updates multiverse'
-        - 'deb-src http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}}-updates multiverse'
+      become: yes
+      become_user: rstudio
 
     - apt: name="{{ item }}" state=latest
       with_items:
@@ -263,39 +72,3 @@
 
     - name: Update distro
       apt: upgrade=dist update_cache=yes
-
-    - name: Import fonts into R
-      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "extrafont::font_import()"
-
-    - name: Install github R packages
-      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "devtools::install_github('{{item}}')"
-      with_items:
-        - diegovalle/mxmortalitydb
-        - twitter/AnomalyDetection
-        - diegovalle/mxmaps
-
-
-    # Zopfli compression
-
-    - name: Create temp directory for downloading zopfli
-      command: mktemp -d /tmp/zopfli.XXXXXX
-      register: mktemp_output
-    
-    - name: check installed
-      command: /usr/local/bin/zopfli -h
-      register: result
-      ignore_errors: True
-      changed_when: False
-
-    - name: Clone zopfli repo
-      git: repo=https://github.com/google/zopfli dest={{ mktemp_output.stdout }} force=yes
-      when: result.rc != 0
-
-    - name: make
-      command: make -j{{ ansible_processor_cores }} chdir={{ mktemp_output.stdout }}
-      when: result.rc != 0
-
-    - name: install
-      shell: if [ -f {{ mktemp_output.stdout }}/zopfli ]; then cp {{ mktemp_output.stdout }}/zopfli /usr/local/bin/zopfli; fi
-      when: result.rc != 0
-
