@@ -153,8 +153,9 @@ RUN Rscript --slave --no-save \
 USER rstudio
 WORKDIR /home/rstudio/new.crimenmexico/elcri.men
 RUN npm install && gatsby telemetry --disable
-COPY src/data /home/rstudio/new.crimenmexico/elcri.men/src/data
+COPY --chown=rstudio src/data /home/rstudio/new.crimenmexico/elcri.men/src/data
 RUN gatsby build --verbose
+RUN rm -rf /home/rstudio/new.crimenmexico/elcri.men/src/data/*.json
 
 WORKDIR /home/rstudio/new.crimenmexico
 
